@@ -13,17 +13,17 @@ if __name__ == "__main__":
         "DESCRIBE": ["身材纤细高挑性感"]
     }
 
-    chatbot = Chatbot(profile, Disposition.COLD)
+    chatbot = Chatbot(profile, Disposition.ELEGANT)
     user = "Human"
     history_list = []
     input_txt = input( user + ": " )
     while input_txt != "exit":
         input_item = {
             "speaker" : user,
-            "content" : input_txt
+            "message" : input_txt
         }
         output = chatbot.chat(input_item, history_list)
         history_list.append(input_item)
         history_list.append(output)
-        print( output["speaker"] + "：" + output["content"] )
+        print( output["speaker"] + "：" + output["message"] )
         input_txt = input( user + ": " )

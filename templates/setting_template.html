@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>设置</title>
+<style type="text/css">
+	*{
+		margin: 0px;
+		padding: 0px;
+		box-sizing: border-box;
+		
+	}
+	body{
+		padding:0;
+		margin:0;
+		background:-moz-linear-gradient(-45deg,#183850 0,#183850 25%,#192C46 50%,#22254C 75%,#22254C 100%);
+		background:-webkit-linear-gradient(-45deg,#183850 0,#183850 25%,#192C46 50%,#22254C 75%,#22254C 100%);
+		background-repeat:no-repeat;
+		background-attachment:fixed
+	}
+	.rg_layout{
+		width: 800px;
+		height: 500px;
+		padding:40px 0 0 0;
+		border: 8px solid #EEEEEE;
+		background-color: white ;
+		margin:150px auto;
+		opacity: 0.75;
+	}
+	.rg_left{
+		float: left;
+		margin: 15px;
+	}
+	.rg_center{
+		
+		
+		float: left;
+	}
+	.rg_right{
+			float: right;
+	}
+	.p_reg{
+		
+		color: #ffd026;
+		font-size: 20px;
+		
+	}
+	.p_en{
+		color: gray;
+		font-size: 20px;
+		
+	}
+	.rg_right > p:first-child{
+		
+		margin: 10px;
+	}
+	.rg_right p a{
+		color: pink;
+	}
+	.td_left{
+		width: 100px;
+		text-align: right;
+		height: 45px;
+		
+	}
+	.td_right{
+		padding-left: 40px;
+		
+	}
+	#name,#birthday,#checkcode,#describe,#user{
+		width: 251px;
+		height: 32px;
+		border: 1px solid gray;
+		border-radius: 5px;
+		padding-left: 15px;
+	}
+	#checkcode{
+		width: 110px;
+	}
+	#img_check{
+		
+		height: 32px;
+		vertical-align: middle;
+	}
+	#btn_sub{
+		width: 150px;
+		height: 40px;
+		background-color: #FFD026;			
+		border: 1px solid  #FFD026;
+		border-radius: 6px;
+		margin-top: 20px;
+	}
+</style>
+</head>
+<body>
+	<div class="rg_layout">
+		<div class="rg_left">
+			<p class="p_reg">设置</p>
+			<p class="p_en">Setting</p>
+		</div>
+		<div class="rg_center">
+			<div class="re_form">
+				<form action="/vicky/api_v1/setting" method="post">
+					<table>
+						<tbody>
+							<tr>
+								<td class="td_left"><label for="name">我的名字</label></td>
+								<td class="td_right"><input type="text" name="name" id="name" placeholder="给我起一个好听的名字"></td>
+							</tr>
+							<tr>
+								<td class="td_left">我的性别</td>
+								<td class="td_right">
+									<input type="radio" name="gender" value="男">男
+									<input type="radio" name="gender" value="女">女
+								</td>
+							</tr>
+							<tr>
+								<td class="td_left"><label for="birthday">我的生日</label></td>
+								<td class="td_right"><input type="date" name="birthday" id="birthday"></td>
+							</tr>
+							<tr>
+								<td class="td_left"><label for="describe">我的描述</label></td>
+								<td class="td_right"><input type="text" name="describe" id="describe" placeholder="你希望我是什么样的？"></td>
+							</tr>
+							<tr>
+								<td class="td_left"><label for="user">你的名字</label></td>
+								<td class="td_right"><input type="text" name="user" id="user" placeholder="我该叫你什么？"></td>
+							</tr>
+							<tr>
+								<td colspan="2" align="center"><input type="submit" id="btn_sub" value="确定"></td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

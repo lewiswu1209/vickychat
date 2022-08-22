@@ -13,7 +13,7 @@ class Chatbot:
         self.profile = profile
 
         try:
-            self.disposition = json.load( open("data/disposition/" + disposition.value, "r") )
+            self.disposition = json.load( open("data/disposition/" + disposition.value, "r", encoding="utf-8") )
             for item in self.disposition:
                 if item["speaker"]=="bot":
                     item["speaker"] = self.profile["NAME"]
@@ -41,14 +41,14 @@ class Chatbot:
     def __get_disposition(self):
         context = ""
         for term in self.disposition:
-            context += term["speaker"] + "：" + term["content"] + "\n"
+            context += term["speaker"] + "：" + term["message"] + "\n"
 
         return context
 
     def __get_context(self, history_list):
         context = ""
         for item in history_list[-4:]:
-            context += item["speaker"] + "：" + item["content"] + "\n"
+            context += item["speaker"] + "：" + item["message"] + "\n"
 
         return context
 
@@ -58,6 +58,9 @@ class Chatbot:
         prompt += self.__get_context(history_list)
 
         return prompt
+
+    def update_profile(self, profile:dict):
+        self.profile = profile
 
     def chat(self, input, history_list=[]):
         max_length = 512
@@ -69,12 +72,14 @@ class Chatbot:
         frequency_penalty = 2
 
         prompt = self.__get_prompt(history_list)
-        prompt += input["speaker"] + "：" + input["content"] + "\n"
+        prompt += input["speaker"] + "：" + input["message"] + "\n"
         prompt += self.profile["NAME"] + "：[MASK]"
 
         forecast = glm.base_strategy_search(prompt, max_length, temperature, top_k, top_p, stop_words, presence_penalty, frequency_penalty)
+        if forecast:
+            forecast = forecast[0]
 
         return {
             "speaker" : self.profile["NAME"],
-            "content" : forecast[0]
+            "message" : forecast
         }
