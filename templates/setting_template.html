@@ -65,7 +65,7 @@
 		padding-left: 40px;
 		
 	}
-	#name,#birthday,#checkcode,#describe,#user{
+	#name,#birthday,#checkcode,#describe,#user,#avatar,#model,#user_pic{
 		width: 251px;
 		height: 32px;
 		border: 1px solid gray;
@@ -98,7 +98,7 @@
 		</div>
 		<div class="rg_center">
 			<div class="re_form">
-				<form action="/vicky/api_v1/setting" method="post">
+				<form action="/vicky/setting_profile" method="post">
 					<table>
 						<tbody>
 							<tr>
@@ -121,8 +121,20 @@
 								<td class="td_right"><input type="text" name="describe" id="describe" placeholder="你希望我是什么样的？"></td>
 							</tr>
 							<tr>
+								<td class="td_left"><label for="describe">我的头像</label></td>
+								<td class="td_right"><input type="text" name="avatar" id="avatar" placeholder="粘贴头像的url"></td>
+							</tr>
+							<tr>
+								<td class="td_left"><label for="describe">我的模型</label></td>
+								<td class="td_right"><input type="text" name="model" id="model" placeholder="粘贴glb模型的url"></td>
+							</tr>
+							<tr>
 								<td class="td_left"><label for="user">你的名字</label></td>
 								<td class="td_right"><input type="text" name="user" id="user" placeholder="我该叫你什么？"></td>
+							</tr>
+							<tr>
+								<td class="td_left"><label for="describe">你的头像</label></td>
+								<td class="td_right"><input type="text" name="user_pic" id="user_pic" placeholder="粘贴头像的url"></td>
 							</tr>
 							<tr>
 								<td colspan="2" align="center"><input type="submit" id="btn_sub" value="确定"></td>

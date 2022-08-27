@@ -64,9 +64,9 @@ class Chatbot:
 
     def chat(self, input, history_list=[]):
         max_length = 512
-        temperature = 0.5
-        top_k = 1
-        top_p = 0
+        temperature = 0.7
+        top_k = 40
+        top_p = 0.7
         stop_words = ["\n"]
         presence_penalty = 2
         frequency_penalty = 2
@@ -79,7 +79,14 @@ class Chatbot:
         if forecast:
             forecast = forecast[0]
 
+        forecast_list = forecast.split(",")
+        fixed_forecast = forecast_list[:1][0]
+        for i in range(1, len(forecast_list)):
+            if forecast_list[i] == forecast_list[i-1]:
+                break
+            fixed_forecast += ("," + forecast_list[i])
+
         return {
             "speaker" : self.profile["NAME"],
-            "message" : forecast
+            "message" : fixed_forecast
         }
