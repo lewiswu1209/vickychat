@@ -3,10 +3,12 @@ import json
 
 from datetime import datetime
 
-import core.glm_130B  as glm
+import bot.core.glm_130B  as glm
 
 from bot.disposition import Disposition
-from utils.time_utils import get_year_diff
+from bot.utils.time_utils import get_year_diff
+
+from config.config import chat_config
 
 class Chatbot:
     def __init__(self, profile:dict, disposition:Disposition):
@@ -75,7 +77,7 @@ class Chatbot:
         prompt += input["speaker"] + "：" + input["message"] + "\n"
         prompt += self.profile["NAME"] + "：[MASK]"
 
-        forecast = glm.base_strategy_search(prompt, max_length, temperature, top_k, top_p, stop_words, presence_penalty, frequency_penalty)
+        forecast = glm.base_strategy_search(prompt, max_length, temperature, top_k, top_p, stop_words, presence_penalty, frequency_penalty, chat_config["api_key"], chat_config["api_secret"])
         if forecast:
             forecast = forecast[0]
 

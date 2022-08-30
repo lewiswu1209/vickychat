@@ -1,0 +1,5 @@
+
+chat_config = {
+    "api_key": "",
+    "api_secret": ""
+}

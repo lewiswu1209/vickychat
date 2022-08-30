@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>聊天机器人</title>
+    <link href="{{ url_for( 'static', filename='css/bootstrap.min.css' ) }}" rel="stylesheet">
+    <style>
+        body {
+            padding:0;
+            margin:0;
+            background:-moz-linear-gradient(-45deg,#183850 0,#183850 25%,#192C46 50%,#22254C 75%,#22254C 100%);
+            background:-webkit-linear-gradient(-45deg,#183850 0,#183850 25%,#192C46 50%,#22254C 75%,#22254C 100%);
+            background-repeat:no-repeat;
+            background-attachment:fixed
+        }
+        ::-webkit-scrollbar {
+            width:10px
+        }
+        ::-webkit-scrollbar-track {
+            border-radius:10px;
+            background-color:rgba(25,147,147,0.1)
+        }
+        ::-webkit-scrollbar-thumb {
+            border-radius:10px;
+            background-color:rgba(25,147,147,0.2)
+        }
+        .container-fluid > .row {
+            height: 100vh;
+        }
+        .h-90 {
+            height: 90%!important;
+        }
+        .h-10 {
+            height: 10%!important;
+        }
+        .chat-thread {
+            overflow-y:scroll;
+            overflow-x:hidden
+        }
+        .chat-thread li {
+            position:relative;
+            clear:both;
+            display:inline-block;
+            padding:16px 40px 16px 20px;
+            margin:0 0 20px 0;
+            font:16px/20px "Noto Sans",sans-serif;
+            border-radius:10px;
+            background-color:rgba(25,147,147,0.2)
+        }
+        .chat-thread li:before {
+            position:absolute;
+            top:0;
+            width:50px;
+            height:50px;
+            border-radius:50px;
+            content:""
+        }
+        .chat-thread li:after {
+            position:absolute;
+            top:15px;
+            content:"";
+            width:0;
+            height:0;
+            border-top:15px solid rgba(25,147,147,0.2)
+        }
+        .chat-thread li.outgoing {
+            animation:show-chat-odd .15s 1 ease-in;
+            -moz-animation:show-chat-odd .15s 1 ease-in;
+            -webkit-animation:show-chat-odd .15s 1 ease-in;
+            float:right;
+            margin-right:80px;
+            color:#0AD5C1
+        }
+        .chat-thread li.outgoing:before {
+            right:-80px;
+            background-image:url("{{user_pic}}");
+            background-size:100% 100%
+        }
+        .chat-thread li.outgoing:after {
+            border-right:15px solid transparent;
+            right:-15px
+        }
+        .chat-thread li.incoming {
+            animation:show-chat-even .15s 1 ease-in;
+            -moz-animation:show-chat-even .15s 1 ease-in;
+            -webkit-animation:show-chat-even .15s 1 ease-in;
+            float:left;
+            margin-left:80px;
+            color:#0EC879
+        }
+        .chat-thread li.incoming:before {
+            left:-80px;
+            background-image: url("{{pic}}");
+            background-size: 100% 100%
+        }
+        .chat-thread li.incoming:after {
+            border-left:15px solid transparent;
+            left:-15px
+        }
+        .msg-box {
+            font:24px "Noto Sans",sans-serif;
+            text-align: center;
+            background:0;
+            color:#0AD5C1;
+            border:0;
+            border-bottom:1px solid rgba(25,147,147,0.2);
+            outline:0
+        }
+    </style>
+</head>
+<body onload="loadhistory()">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 d-none d-md-block">
+            </div>
+            <div class="col-md-8 col-xs-12 col-sm-12">
+                <div class="row h-90">
+                    <div class="col-sm-7 d-none d-sm-block">
+                        <ul class="chat-thread" style="height: 90vh;">
+                        </ul>
+                    </div>
+                    <div class="col-sm-5">
+                        <model-viewer class="col-md-12 h-100" src="{{avatar_url}}" camera-controls />
+                    </div>
+                </div>
+                <div class="row h-10 align-items-center">
+                    <div class="col-md-12">
+                        <div class="row d-block d-sm-none">
+                            <div class="col-md-12">
+                                <input id="output-box" class="col-md-12 msg-box" type="text" disabled placeholder="aaaaaaaaaaaaaaaaa">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input id="input-box" class="col-md-12 msg-box" type="text" autocomplete="off" autofocus placeholder="有空和我聊天么~">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 d-none d-md-block">
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for( 'static', filename='js/jquery.min.js' ) }}"></script>
+    <script src="{{ url_for( 'static', filename='js/bootstrap.min.js' ) }}"></script>
+    <script src="https://unpkg.com/@google/model-viewer@1.12.0/dist/model-viewer.min.js" type="module"></script>
+    <script>
+        var input_box = document.querySelector("#input-box");
+
+        input_box.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if (e && e.keyCode == 13 ) {
+                send_data();
+            }
+        }
+
+        function send_data() {
+            var chat_thread = document.querySelector(".chat-thread");
+            //var input_box = document.querySelector("#input-box");
+            var output_box = document.querySelector("#output-box");
+
+            input_box.disabled = true;
+            var text = input_box.value;
+
+            var new_li_label = document.createElement("li"), new_li_text = document.createTextNode(text);
+            new_li_label.className="outgoing";
+            new_li_label.appendChild(new_li_text);
+            chat_thread.appendChild(new_li_label);
+            chat_thread.scrollTop = chat_thread.scrollHeight;
+
+            input_box.value = "";
+            output_box.value= "对方正在输入……";
+            $.ajax({ 
+                url: "/vicky/api_v1/chat?message="+text, 
+                dataType: 'json',
+                success: function(data){
+                    output_box.value = data.message
+
+                    var new_li_label = document.createElement("li");
+                    var new_li_text = document.createTextNode(data.message);
+                    new_li_label.className=data.type;
+                    new_li_label.appendChild(new_li_text);
+                    chat_thread.appendChild(new_li_label);
+                    //chat_thread.appendChild(new_li_label);
+                    chat_thread.scrollTop = chat_thread.scrollHeight;
+
+                    input_box.disabled = false;
+                },
+                timeout: 600000,
+                error: function(jqXHR, status, errorThrown){
+                    var output_box = document.querySelector("#output-box");
+                    output_box.value = "网络超时10分钟，请重试"
+
+                    var new_li_label = document.createElement("li");
+                    var new_text = document.createTextNode("网络超时10分钟，请重试");
+
+                    new_li_label.appendChild(new_text);
+                    chat_thread.appendChild(new_li_label);
+                    chat_thread.scrollTop = chat_thread.scrollHeight;
+
+                    input_box.disabled = false;
+                } 
+            });
+        }
+
+        function loadhistory() {
+            var chat_thread = document.querySelector(".chat-thread");
+            var input_box = document.querySelector("#input-box");
+            input_box.disabled = true;
+            document.title = "聊天机器人 ~ 正在回忆…"
+            $.ajax({ 
+                url: "/vicky/api_v1/get_history", 
+                dataType: 'json',
+                success: function(data){
+                    data.forEach(function(item) {
+                        var new_li_label = document.createElement("li");
+                        var new_li_text = document.createTextNode(item.message);
+                        new_li_label.className=item.type;
+                        new_li_label.appendChild(new_li_text);
+                        chat_thread.appendChild(new_li_label);
+                    });
+                    chat_thread.scrollTop = chat_thread.scrollHeight;
+                    
+                    input_box.disabled = false;
+                    document.title = "聊天机器人"
+                },
+                error: function(jqXHR, status, errorThrown){
+                    input_box.disabled = false;
+                    document.title = "聊天机器人"
+                } 
+            });
+        }
+    </script>
+</body>
+</html>
