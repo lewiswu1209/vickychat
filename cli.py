@@ -1,29 +1,20 @@
 
-from bot.chatbot import Chatbot
-from bot.disposition import Disposition
+import sys
+import requests
+
+from config.config import chat_config
 
 if __name__ == "__main__":
+    msg = sys.argv[1]
+    hash = chat_config["hash"]
 
-    profile = {
-        "NAME": "Vicky",
-        "GENDER": "女",
-        "YEAROFBIRTH": "1995",
-        "MONTHOFBIRTH": "10",
-        "DAYOFBIRTH": "10",
-        "DESCRIBE": ["身材纤细高挑性感"]
-    }
-
-    chatbot = Chatbot(profile, Disposition.ELEGANT)
-    user = "Human"
-    history_list = []
-    input_txt = input( user + ": " )
-    while input_txt != "exit":
-        input_item = {
-            "speaker" : user,
-            "message" : input_txt
-        }
-        output = chatbot.chat(input_item, history_list)
-        history_list.append(input_item)
-        history_list.append(output)
-        print( output["speaker"] + "：" + output["message"] )
-        input_txt = input( user + ": " )
+    url = "{}/api_v1/set_session_hash?hash={}".format(chat_config["webhost"], hash)
+    rs = requests.get(url).json()
+    if rs["status"]==2:
+        print("在设置中配置hash")
+    if rs["status"]==1:
+        print("在web中创建机器人")
+    if rs["status"]==0:
+        url = "{}/api_v1/chat?message={}&hash={}".format(chat_config["webhost"], msg, hash)
+        rs = requests.get(url).json()
+        print("{}:{}".format(rs["speaker"], rs["message"]))

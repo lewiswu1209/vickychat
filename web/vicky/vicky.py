@@ -141,24 +141,25 @@ def get_history():
 def send_msg():
     global matrix
     session_hash = session.get("session_hash")
-    if session_hash:
-        memery = matrix.get(session_hash, {})
-        with memery["lock"]:
-            user = memery["user"]
-            bot = memery["bot"]
-            history_list = memery["history"]
+    if not session_hash:
+        session_hash = request.args.get("hash")
+    memery = matrix.get(session_hash, {})
+    with memery["lock"]:
+        user = memery["user"]
+        bot = memery["bot"]
+        history_list = memery["history"]
 
-            if request.args.get("message"):
-                input_item = {
-                    "speaker" : user,
-                    "message" : request.args.get("message")
-                }
+        if request.args.get("message"):
+            input_item = {
+                "speaker" : user,
+                "message" : request.args.get("message")
+            }
+            output = bot.chat(input_item, history_list)
+            while output.get("message") is None or output["message"] == "null" or output["message"] == "":
                 output = bot.chat(input_item, history_list)
-                while output.get("message") is None or output["message"] == "null" or output["message"] == "":
-                    output = bot.chat(input_item, history_list)
-                history_list.append(input_item)
-                history_list.append(output)
-                matrix[session_hash]["history"] = history_list
-                output["type"]="incoming"
-                output["status"]=0
-                return jsonify(output)
+            history_list.append(input_item)
+            history_list.append(output)
+            matrix[session_hash]["history"] = history_list
+            output["type"]="incoming"
+            output["status"]=0
+            return jsonify(output)
