@@ -36,6 +36,7 @@
             height: 10%!important;
         }
         .chat-thread {
+            padding-top:10px;
             overflow-y:scroll;
             overflow-x:hidden
         }
@@ -129,7 +130,7 @@
                     <div class="col-md-12">
                         <div class="row d-block d-sm-none">
                             <div class="col-md-12">
-                                <input id="output-box" class="col-md-12 msg-box" type="text" disabled placeholder="aaaaaaaaaaaaaaaaa">
+                                <input id="output-box" class="col-md-12 msg-box" type="text" disabled placeholder="我会在这里回答你">
                             </div>
                         </div>
                         <div class="row">
@@ -173,6 +174,7 @@
 
             input_box.value = "";
             output_box.value= "对方正在输入……";
+            document.title = "聊天机器人 ~ 对方正在输入……"
             $.ajax({ 
                 url: "/vicky/api_v1/chat?message="+text, 
                 dataType: 'json',
@@ -184,25 +186,26 @@
                     new_li_label.className=data.type;
                     new_li_label.appendChild(new_li_text);
                     chat_thread.appendChild(new_li_label);
-                    //chat_thread.appendChild(new_li_label);
                     chat_thread.scrollTop = chat_thread.scrollHeight;
 
                     input_box.disabled = false;
+                    document.title = "聊天机器人"
                 },
                 timeout: 600000,
                 error: function(jqXHR, status, errorThrown){
                     var output_box = document.querySelector("#output-box");
-                    output_box.value = "网络超时10分钟，请重试"
+                    output_box.value = "系统错误，请重试"
 
                     var new_li_label = document.createElement("li");
-                    var new_text = document.createTextNode("网络超时10分钟，请重试");
-
+                    var new_text = document.createTextNode("系统错误，请重试");
+                    new_li_label.className=data.type;
                     new_li_label.appendChild(new_text);
                     chat_thread.appendChild(new_li_label);
                     chat_thread.scrollTop = chat_thread.scrollHeight;
 
                     input_box.disabled = false;
-                } 
+                    document.title = "聊天机器人"
+                }
             });
         }
 

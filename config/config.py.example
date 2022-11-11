@@ -1,7 +1,6 @@
 
 chat_config = {
-    "api_key": "",
-    "api_secret": "",
     "webhost": "http://127.0.0.1/vicky",
-    "hash": "aaaaaaaaa"
+    "hash": "hash"
 }
+api_token = ""

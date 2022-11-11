@@ -1,14 +1,15 @@
 
 import json
 
+from random import randint
 from datetime import datetime
 
-import bot.core.glm_130B  as glm
+import bot.core.bloomz as bloomz
 
 from bot.disposition import Disposition
 from bot.utils.time_utils import get_year_diff
 
-from config.config import chat_config
+from config.config import api_token
 
 class Chatbot:
     def __init__(self, profile:dict, disposition:Disposition):
@@ -49,7 +50,7 @@ class Chatbot:
 
     def __get_context(self, history_list):
         context = ""
-        for item in history_list[-4:]:
+        for item in history_list[-10:]:
             context += item["speaker"] + "：" + item["message"] + "\n"
 
         return context
@@ -65,30 +66,21 @@ class Chatbot:
         self.profile = profile
 
     def chat(self, input, history_list=[]):
-        max_length = 512
-        temperature = 0.7
-        top_k = 40
-        top_p = 0.7
-        stop_words = ["\n"]
-        presence_penalty = 2
-        frequency_penalty = 2
+        seed = randint(1, 512)
 
         prompt = self.__get_prompt(history_list)
         prompt += input["speaker"] + "：" + input["message"] + "\n"
-        prompt += self.profile["NAME"] + "：[MASK]"
+        prompt += self.profile["NAME"] + "："
 
-        forecast = glm.base_strategy_search(prompt, max_length, temperature, top_k, top_p, stop_words, presence_penalty, frequency_penalty, chat_config["api_key"], chat_config["api_secret"])
-        if forecast:
-            forecast = forecast[0]
+        generated_text = bloomz.sample( prompt, seed, 0.7,api_token)
+        if generated_text:
+            generated_text_list = generated_text.split(input["speaker"] + "：")
+            generated_text_list = generated_text_list[0].split(self.profile["NAME"] + "：")
+            fixed_generated_text = generated_text_list[0].strip(" \n")
 
-        forecast_list = forecast.split(",")
-        fixed_forecast = forecast_list[:1][0]
-        for i in range(1, len(forecast_list)):
-            if forecast_list[i] == forecast_list[i-1]:
-                break
-            fixed_forecast += ("," + forecast_list[i])
-
-        return {
-            "speaker" : self.profile["NAME"],
-            "message" : fixed_forecast
-        }
+            return {
+                "speaker" : self.profile["NAME"],
+                "message" : fixed_generated_text
+            }
+        else:
+            return None
