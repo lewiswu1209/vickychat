@@ -155,11 +155,13 @@ def send_msg():
                 "message" : request.args.get("message")
             }
             output = bot.chat(input_item, history_list)
-            while output.get("message") is None or output["message"] == "null" or output["message"] == "":
-                output = bot.chat(input_item, history_list)
             history_list.append(input_item)
-            history_list.append(output)
+            for item in output:
+                history_list.append(item)
+                item["type"]="incoming"
             matrix[session_hash]["history"] = history_list
-            output["type"]="incoming"
-            output["status"]=0
-            return jsonify(output)
+
+            return jsonify({
+                "status" : 0,
+                "output" : output
+            })

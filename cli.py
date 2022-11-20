@@ -17,4 +17,5 @@ if __name__ == "__main__":
     if rs["status"]==0:
         url = "{}/api_v1/chat?message={}&hash={}".format(chat_config["webhost"], msg, hash)
         rs = requests.get(url).json()
-        print("{}:{}".format(rs["speaker"], rs["message"]))
+        for item in rs["output"]:
+            print("{}:{}".format(item["speaker"], item["message"]))

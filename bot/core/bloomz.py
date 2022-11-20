@@ -14,12 +14,11 @@ def generate(prompt, parameters, api_token):
             "wait_for_model": True
         }
     }
-
     response = requests.request("POST", API_URL,  headers=headers, json=data)
 
     if response.status_code == 200:
         json_response = json.loads(response.content.decode("utf-8"))
-        return json_response[0]["generated_text"][len(prompt):]
+        return json_response[0]["generated_text"]
 
     return None
 
@@ -44,5 +43,4 @@ def greedy(prompt, seed, api_token):
         "length_penalty": 0.0,
         "eos_token_id": None
     }
-
     return generate(prompt, parameters, api_token)

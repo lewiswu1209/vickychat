@@ -179,13 +179,24 @@
                 url: "/vicky/api_v1/chat?message="+text, 
                 dataType: 'json',
                 success: function(data){
-                    output_box.value = data.message
+                    flag = false
+                    data["output"].forEach(function(item) {
+                        if (flag) {
+                            now = new Date();
+                            until_time = now.getTime() + 4000;
+                            while(now < until_time) {
+                                now = new Date();
+                            }
+                        }
+                        flag = true
+                        output_box.value = item.message
 
-                    var new_li_label = document.createElement("li");
-                    var new_li_text = document.createTextNode(data.message);
-                    new_li_label.className=data.type;
-                    new_li_label.appendChild(new_li_text);
-                    chat_thread.appendChild(new_li_label);
+                        var new_li_label = document.createElement("li");
+                        var new_li_text = document.createTextNode(item.message);
+                        new_li_label.className=item.type;
+                        new_li_label.appendChild(new_li_text);
+                        chat_thread.appendChild(new_li_label);
+                    });
                     chat_thread.scrollTop = chat_thread.scrollHeight;
 
                     input_box.disabled = false;

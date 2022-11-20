@@ -1,15 +1,14 @@
 
 import json
 
+import bot.core.bloomz as bloomz
+
 from random import randint
 from datetime import datetime
 
-import bot.core.bloomz as bloomz
-
+from config.config import api_token
 from bot.disposition import Disposition
 from bot.utils.time_utils import get_year_diff
-
-from config.config import api_token
 
 class Chatbot:
     def __init__(self, profile:dict, disposition:Disposition):
@@ -37,21 +36,24 @@ class Chatbot:
         )
 
         for item in self.profile["DESCRIBE"]:
-            profile_str += "," + item
+            profile_str += ","
+            profile_str += item
 
         return profile_str + "\n"
 
     def __get_disposition(self):
         context = ""
-        for term in self.disposition:
-            context += term["speaker"] + "：" + term["message"] + "\n"
+
+        for item in self.disposition:
+            context += "%s：%s\n" % (item["speaker"], item["message"])
 
         return context
 
     def __get_context(self, history_list):
         context = ""
+
         for item in history_list[-10:]:
-            context += item["speaker"] + "：" + item["message"] + "\n"
+            context += "%s：%s\n" % (item["speaker"], item["message"])
 
         return context
 
@@ -66,21 +68,25 @@ class Chatbot:
         self.profile = profile
 
     def chat(self, input, history_list=[]):
+        generated_text_list = []
+
         seed = randint(1, 512)
 
         prompt = self.__get_prompt(history_list)
-        prompt += input["speaker"] + "：" + input["message"] + "\n"
-        prompt += self.profile["NAME"] + "："
+        prompt += "%s：%s\n" % (input["speaker"], input["message"])
+        prompt += "%s：" % self.profile["NAME"]
 
-        generated_text = bloomz.sample( prompt, seed, 0.7,api_token)
-        if generated_text:
-            generated_text_list = generated_text.split(input["speaker"] + "：")
-            generated_text_list = generated_text_list[0].split(self.profile["NAME"] + "：")
-            fixed_generated_text = generated_text_list[0].strip(" \n")
+        output = bloomz.sample( prompt, seed, 0.7,api_token)
 
-            return {
-                "speaker" : self.profile["NAME"],
-                "message" : fixed_generated_text
-            }
-        else:
-            return None
+        while len(generated_text_list) == 0:
+            if output:
+                output = output[( len(prompt)-len(self.profile["NAME"] + "：") ):]
+                for line in output.split("\n"):
+                    for generated in line.split(" "):
+                        generated = generated.strip(" ")
+                        if generated.startswith(self.profile["NAME"] + "："):
+                            message = generated[len(self.profile["NAME"] + "："):]
+                            if message and message != "":
+                                generated_text_list.append({"speaker": self.profile["NAME"], "message": message})
+
+        return generated_text_list
