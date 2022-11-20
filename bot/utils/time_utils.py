@@ -17,3 +17,9 @@ def get_month_by_date(date):
 def get_day_by_date(date):
     date = datetime.strptime(date, '%Y-%m-%d')
     return date.day
+
+def get_current_time():
+    return datetime.now()
+
+def get_current_time_str():
+    return datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')

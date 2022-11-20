@@ -9,6 +9,7 @@ from datetime import datetime
 from config.config import api_token
 from bot.disposition import Disposition
 from bot.utils.time_utils import get_year_diff
+from bot.utils.time_utils import get_current_time_str
 
 class Chatbot:
     def __init__(self, profile:dict, disposition:Disposition):
@@ -73,6 +74,7 @@ class Chatbot:
         seed = randint(1, 512)
 
         prompt = self.__get_prompt(history_list)
+        prompt += "%s\n" % get_current_time_str()
         prompt += "%s：%s\n" % (input["speaker"], input["message"])
         prompt += "%s：" % self.profile["NAME"]
 
