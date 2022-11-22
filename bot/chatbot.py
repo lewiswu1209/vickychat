@@ -74,21 +74,39 @@ class Chatbot:
         seed = randint(1, 512)
 
         prompt = self.__get_prompt(history_list)
-        prompt += "%s\n" % get_current_time_str()
+        prompt += "现在是%s\n" % get_current_time_str()
         prompt += "%s：%s\n" % (input["speaker"], input["message"])
         prompt += "%s：" % self.profile["NAME"]
 
-        output = bloomz.sample( prompt, seed, 0.7,api_token)
-
         while len(generated_text_list) == 0:
+            output = bloomz.sample( prompt, seed, 0.7,api_token)
             if output:
                 output = output[( len(prompt)-len(self.profile["NAME"] + "：") ):]
+                # is_finished = False
+                # for line in output.split("\n"):
+                #     line = line.replace(", ", ",")
+                #     for generated in line.split(" "):
+                #         generated = generated.strip(" ")
+                #         if generated.startswith(self.profile["NAME"] + "："):
+                #             message = generated[len(self.profile["NAME"] + "："):]
+                #             if message and message != "":
+                #                 generated_text_list.append({"speaker": self.profile["NAME"], "message": message})
+                #         else:
+                #             is_finished = True
+                #             break
+                #     if is_finished:
+                #         break
                 for line in output.split("\n"):
-                    for generated in line.split(" "):
-                        generated = generated.strip(" ")
+                    # line = line.replace(", ", ",")
+                    # for generated in line.split(" "):
+                        generated = line.strip(" ")
                         if generated.startswith(self.profile["NAME"] + "："):
                             message = generated[len(self.profile["NAME"] + "："):]
                             if message and message != "":
                                 generated_text_list.append({"speaker": self.profile["NAME"], "message": message})
-
+                        else:
+                            # is_finished = True
+                            break
+                    # if is_finished:
+                    #     break
         return generated_text_list
