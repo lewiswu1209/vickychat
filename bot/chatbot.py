@@ -8,13 +8,14 @@ from datetime import datetime
 
 from config.config import api_token
 from bot.disposition import Disposition
+from bot.memery.memery import Memery
 from bot.utils.time_utils import get_year_diff
 from bot.utils.time_utils import get_current_time_str
 
 class Chatbot:
     def __init__(self, profile:dict, disposition:Disposition):
         self.profile = profile
-
+        self.memery = Memery()
         try:
             self.disposition = json.load( open("data/disposition/" + disposition.value, "r", encoding="utf-8") )
             for item in self.disposition:
@@ -61,7 +62,8 @@ class Chatbot:
     def __get_prompt(self, history_list=[]):
         prompt = self.__get_profile_str()
         prompt += self.__get_disposition()
-        prompt += self.__get_context(history_list)
+        #prompt += self.__get_context(history_list)
+        prompt += self.memery.get_prompt_by_last_memery(10)
 
         return prompt
 
@@ -78,10 +80,14 @@ class Chatbot:
         prompt += "%s：%s\n" % (input["speaker"], input["message"])
         prompt += "%s：" % self.profile["NAME"]
 
+        self.memery.add_memery(input)
+
         while len(generated_text_list) == 0:
+            print("====" + prompt)
             output = bloomz.sample( prompt, seed, 0.7,api_token)
             if output:
                 output = output[( len(prompt)-len(self.profile["NAME"] + "：") ):]
+                print("****" + output)
                 # is_finished = False
                 # for line in output.split("\n"):
                 #     line = line.replace(", ", ",")
@@ -104,6 +110,7 @@ class Chatbot:
                             message = generated[len(self.profile["NAME"] + "："):]
                             if message and message != "":
                                 generated_text_list.append({"speaker": self.profile["NAME"], "message": message})
+                                self.memery.add_memery({"speaker": self.profile["NAME"], "message": message})
                         else:
                             # is_finished = True
                             break
