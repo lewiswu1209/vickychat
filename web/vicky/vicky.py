@@ -7,10 +7,9 @@ from flask import Blueprint
 from flask import session, request
 from flask import jsonify, render_template, redirect, url_for
 
-from bot.chatbot import Chatbot
-from bot.disposition import Disposition
+from robot import Robot
 
-from bot.utils.time_utils import get_year_by_date, get_month_by_date, get_day_by_date
+from utils.time_utils import get_year_by_date_str, get_month_by_date_str, get_day_by_date_str
 
 vicky_app = Blueprint("vicky", __name__, url_prefix="/vicky")
 
@@ -32,18 +31,6 @@ def index():
         return render_template( "vicky.html", avatar_url=avatar_url, pic=pic, user_pic=user_pic )
     else:
         return redirect( url_for("vicky.profile") )
-
-# @vicky_app.route("/chatroom")
-# def chatroom():
-#     global matrix
-#     session_hash = session.get( "session_hash" )
-
-#     if session_hash and session_hash in matrix.keys():
-#         pic = matrix.get(session_hash).get("bot").profile["PIC"]
-#         user_pic = matrix.get(session_hash).get("user_pic")
-#         return render_template( "chatroom.html", pic=pic, user_pic=user_pic)
-#     else:
-#         return redirect( url_for("vicky.profile") )
 
 @vicky_app.route("/profile", endpoint="profile")
 def profile():
@@ -70,9 +57,9 @@ def setting_profile():
     profile = {
         "NAME": name,
         "GENDER": gender,
-        "YEAROFBIRTH": str( get_year_by_date(birthday) ),
-        "MONTHOFBIRTH": str( get_month_by_date(birthday) ),
-        "DAYOFBIRTH": str( get_day_by_date(birthday) ),
+        "YEAROFBIRTH": str( get_year_by_date_str(birthday) ),
+        "MONTHOFBIRTH": str( get_month_by_date_str(birthday) ),
+        "DAYOFBIRTH": str( get_day_by_date_str(birthday) ),
         "DESCRIBE": [describe],
         "PIC": pic,
         "AVATAR": avatar
@@ -82,7 +69,7 @@ def setting_profile():
     memory["lock"] = threading.Lock()
     memory["user"] = user
     memory["user_pic"] = user_pic
-    memory["bot"] = Chatbot(profile, Disposition.ELEGANT)
+    memory["bot"] = Robot(profile)
 
     matrix[session_hash] = memory
 
@@ -154,7 +141,7 @@ def send_msg():
                 "speaker" : user,
                 "message" : request.args.get("message")
             }
-            output = bot.chat(input_item, history_list)
+            output = bot.chat(input_item)
             history_list.append(input_item)
             for item in output:
                 history_list.append(item)
