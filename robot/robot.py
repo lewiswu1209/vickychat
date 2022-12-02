@@ -2,36 +2,43 @@
 from random import randint
 from datetime import datetime
 
-import robot.core.bloomz as bloomz
-
-from robot.memery import Memery
-from robot.memery import MemeryType
+import robot.core.bloom as bloom
 
 from config import api_token
 
-from utils.time_utils import get_current_datetime_str
+from robot.state import State
+from robot.memery import Memery
+from robot.memery import MemeryType
+
+from utils.time_utils import get_current_datetime
+from utils.time_utils import get_datetime_str_by_datetime
 from utils.time_utils import get_datetime_str_by_timestamp
 from utils.time_utils import get_interval_years_by_date_str
 from utils.time_utils import get_interval_minutes_by_timestamp
 
 class Robot:
-    def __init__(self, profile:dict) -> None:
-        self.profile:dict = profile
+    def __init__(self, settings:dict) -> None:
         self.memery:Memery = Memery()
+        self.state:State = State()
+
+        self.state.update_profile(settings)
+        self.state.update_describe_list(settings["DESCRIBE"])
 
     def __get_profile_str(self) -> str:
+        profile = self.state.profile
+
         profile_str:str = "{}，{}，生日{}年{}月{}日，{}岁".format(
-            self.profile["NAME"],
-            self.profile["GENDER"],
-            self.profile["YEAROFBIRTH"],
-            self.profile["MONTHOFBIRTH"],
-            self.profile["DAYOFBIRTH"],
+            profile["NAME"],
+            profile["GENDER"],
+            profile["YEAROFBIRTH"],
+            profile["MONTHOFBIRTH"],
+            profile["DAYOFBIRTH"],
             get_interval_years_by_date_str(
-                self.profile["YEAROFBIRTH"] + "-" + self.profile["MONTHOFBIRTH"] + "-" + self.profile["DAYOFBIRTH"],
+                profile["YEAROFBIRTH"] + "-" + profile["MONTHOFBIRTH"] + "-" + profile["DAYOFBIRTH"],
                 datetime.now().strftime("%Y-%m-%d")
             )
         )
-        for describe in self.profile["DESCRIBE"]:
+        for describe in self.state.describe_list:
             profile_str += "，"
             profile_str += describe
         profile_str += "。"
@@ -58,31 +65,32 @@ class Robot:
 
         return prompt
 
-    def update_profile(self, profile:dict) -> None:
-        self.profile = profile
-
     def chat(self, input:dict) -> list[str]:
         generated_text_list:list[dict] = []
-
         seed:int = randint(1, 512)
 
+        current_datetime:datetime = get_current_datetime()
+
         prompt:str = self.__get_prompt()
-        prompt += "\n现在是%s\n" % get_current_datetime_str()
+        prompt += "\n现在是%s\n" % get_datetime_str_by_datetime(current_datetime)
+        action = self.state.get_action_by_datetime(current_datetime)
+        if action.label:
+            prompt += "%s%s\n" % ( self.state.profile["NAME"], action.label )
         prompt += "%s：%s\n" % (input["speaker"], input["message"])
-        prompt += "%s：" % self.profile["NAME"]
+        prompt += "%s：" % self.state.profile["NAME"]
 
         self.memery.add_memery(MemeryType.CHAT, input)
         while len(generated_text_list) == 0:
-            output:str = bloomz.sample( prompt, seed, 0.65,api_token)
+            output:str = bloom.sample( prompt, seed, 0.65,api_token)
             if output:
-                output:str = output[( len(prompt)-len(self.profile["NAME"] + "：") ):]
+                output:str = output[( len(prompt)-len(self.state.profile["NAME"] + "：") ):]
                 for line in output.split("\n"):
                     generated:str = line.strip(" ")
-                    if generated.startswith(self.profile["NAME"] + "："):
-                        message:str = generated[len(self.profile["NAME"] + "："):]
+                    if generated.startswith(self.state.profile["NAME"] + "："):
+                        message:str = generated[len(self.state.profile["NAME"] + "："):]
                         if message and message != "":
-                            generated_text_list.append({"speaker": self.profile["NAME"], "message": message})
-                            self.memery.add_memery(MemeryType.CHAT, {"speaker": self.profile["NAME"], "message": message})
+                            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
+                            self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
                     else:
                         break
         return generated_text_list

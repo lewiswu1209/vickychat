@@ -25,8 +25,8 @@ def index():
     session_hash = session.get( "session_hash" )
 
     if session_hash and session_hash in matrix.keys():
-        avatar_url = matrix.get(session_hash).get("bot").profile["AVATAR"]
-        pic = matrix.get(session_hash).get("bot").profile["PIC"]
+        avatar_url = matrix.get(session_hash).get("bot").state.profile["AVATAR"]
+        pic = matrix.get(session_hash).get("bot").state.profile["PIC"]
         user_pic = matrix.get(session_hash).get("user_pic")
         return render_template( "vicky.html", avatar_url=avatar_url, pic=pic, user_pic=user_pic )
     else:
