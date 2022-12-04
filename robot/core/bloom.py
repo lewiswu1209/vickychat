@@ -15,15 +15,17 @@ def generate(prompt, parameters, api_token):
         }
     }
     response = requests.request("POST", API_URL,  headers=headers, json=data)
+
     if response.status_code == 200:
         json_response = json.loads(response.content.decode("utf-8"))
-        return json_response[0]["generated_text"]
+        if "error" not in json_response:
+            return json_response[0]["generated_text"]
 
     return None
 
-def sample(prompt, seed, top_p, api_token):
+def sample(prompt, max_new_tokens, seed, top_p, api_token):
     parameters = {
-        "max_new_tokens": 100,
+        "max_new_tokens": max_new_tokens,
         "top_p": top_p,
         "do_sample": True,
         "seed": seed,
@@ -33,9 +35,9 @@ def sample(prompt, seed, top_p, api_token):
     }
     return generate(prompt, parameters, api_token)
 
-def greedy(prompt, seed, api_token):
+def greedy(prompt, max_new_tokens, seed, api_token):
     parameters = {
-        "max_new_tokens": 100,
+        "max_new_tokens": max_new_tokens,
         "do_sample": False,
         "seed": seed,
         "early_stopping": False,

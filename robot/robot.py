@@ -9,6 +9,7 @@ from config import api_token
 from robot.state import State
 from robot.memery import Memery
 from robot.memery import MemeryType
+from robot.state.action import Action
 
 from utils.time_utils import get_current_datetime
 from utils.time_utils import get_datetime_str_by_datetime
@@ -66,22 +67,23 @@ class Robot:
         return prompt
 
     def chat(self, input:dict) -> list[str]:
-        generated_text_list:list[dict] = []
-        seed:int = randint(1, 512)
-
         current_datetime:datetime = get_current_datetime()
+        action:Action = self.state.get_action_by_datetime(current_datetime)
 
         prompt:str = self.__get_prompt()
         prompt += "\n现在是%s\n" % get_datetime_str_by_datetime(current_datetime)
-        action = self.state.get_action_by_datetime(current_datetime)
         if action.label:
             prompt += "%s%s\n" % ( self.state.profile["NAME"], action.label )
         prompt += "%s：%s\n" % (input["speaker"], input["message"])
         prompt += "%s：" % self.state.profile["NAME"]
 
         self.memery.add_memery(MemeryType.CHAT, input)
-        while len(generated_text_list) == 0:
-            output:str = bloom.sample( prompt, seed, 0.65,api_token)
+
+        generated_text_list:list[dict] = []
+        seed:int = randint(1, 512)
+        retry_count = 0
+        while len(generated_text_list) == 0 and retry_count < 3:
+            output:str = bloom.sample( prompt, 64, seed, 0.65,api_token)
             if output:
                 output:str = output[( len(prompt)-len(self.state.profile["NAME"] + "：") ):]
                 for line in output.split("\n"):
@@ -93,4 +95,6 @@ class Robot:
                             self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
                     else:
                         break
+        if len(generated_text_list) == 0:
+            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "你说什么？风太大我听不见~"})
         return generated_text_list
