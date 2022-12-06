@@ -3,6 +3,7 @@ from random import randint
 from datetime import datetime
 
 import robot.core.bloom as bloom
+import robot.core.mt0_xxl_mt as mt0_xxl_mt
 
 from config import api_token
 
@@ -62,7 +63,7 @@ class Robot:
 
     def __get_prompt(self) -> str:
         prompt:str = self.__get_profile_str()
-        prompt += self.__get_prompt_by_last_memery(16)
+        prompt += self.__get_prompt_by_last_memery(10)
 
         return prompt
 
@@ -81,20 +82,27 @@ class Robot:
 
         generated_text_list:list[dict] = []
         seed:int = randint(1, 512)
-        retry_count = 0
-        while len(generated_text_list) == 0 and retry_count < 3:
-            output:str = bloom.sample( prompt, 64, seed, 0.65,api_token)
+        output:str = bloom.sample(prompt, 64, seed, 0.65, api_token)
+        if output:
+            output:str = output[( len(prompt)-len(self.state.profile["NAME"] + "：") ):]
+            for line in output.split("\n"):
+                generated:str = line.strip(" ")
+                if generated.startswith(self.state.profile["NAME"] + "："):
+                    message:str = generated[len(self.state.profile["NAME"] + "："):]
+                    if message and message != "":
+                        generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
+                        self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
+                else:
+                    break
+        else:
+            output:str = mt0_xxl_mt.sample(prompt, 64, seed, 0.65, api_token)
             if output:
-                output:str = output[( len(prompt)-len(self.state.profile["NAME"] + "：") ):]
-                for line in output.split("\n"):
-                    generated:str = line.strip(" ")
-                    if generated.startswith(self.state.profile["NAME"] + "："):
-                        message:str = generated[len(self.state.profile["NAME"] + "："):]
-                        if message and message != "":
-                            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
-                            self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
-                    else:
-                        break
+                print(output)
+                if not output.startswith(input["speaker"] + "：") and not output.startswith(input["speaker"] + ":"):
+                    if output.startswith(self.state.profile["NAME"] + "：") or output.startswith(self.state.profile["NAME"] + ":"):
+                        output:str = output[( len(self.state.profile["NAME"] + "：") ):]
+                    generated_text_list.append({"speaker": self.state.profile["NAME"], "message": output})
+                    self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": output})
         if len(generated_text_list) == 0:
-            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "你说什么？风太大我听不见~"})
+            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "……"})
         return generated_text_list
