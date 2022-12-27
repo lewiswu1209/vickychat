@@ -56,7 +56,7 @@ class Robot:
                 pass
             else:
                 prompt += "\n现在是%s\n" % get_datetime_str_by_timestamp( cur_memery["timestap"] )
-            prompt += "%s：%s\n" % (cur_memery["data"]["speaker"], cur_memery["data"]["message"])
+            prompt += "{%s：%s}\n" % (cur_memery["data"]["speaker"], cur_memery["data"]["message"])
             prep_memery = cur_memery
 
         return prompt
@@ -75,8 +75,8 @@ class Robot:
         prompt += "\n现在是%s\n" % get_datetime_str_by_datetime(current_datetime)
         if action.label:
             prompt += "%s%s\n" % ( self.state.profile["NAME"], action.label )
-        prompt += "%s：%s\n" % (input["speaker"], input["message"])
-        prompt += "%s：" % self.state.profile["NAME"]
+        prompt += "{%s：%s}\n" % (input["speaker"], input["message"])
+        prompt += "{%s：" % self.state.profile["NAME"]
 
         self.memery.add_memery(MemeryType.CHAT, input)
 
@@ -84,11 +84,16 @@ class Robot:
         seed:int = randint(1, 512)
         output:str = bloom.sample(prompt, 64, seed, 0.65, api_token)
         if output:
-            output:str = output[( len(prompt)-len(self.state.profile["NAME"] + "：") ):]
-            for line in output.split("\n"):
-                generated:str = line.strip(" ")
+            output:str = output[( len(prompt)-len("{" + self.state.profile["NAME"] + "：") ):]
+            for line in output.split("}"):
+                generated:str = line
                 if generated.startswith(self.state.profile["NAME"] + "："):
                     message:str = generated[len(self.state.profile["NAME"] + "："):]
+                    if message and message != "":
+                        generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
+                        self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
+                elif generated.startswith("{" + self.state.profile["NAME"] + "："):
+                    message:str = generated[len("{" + self.state.profile["NAME"] + "："):]
                     if message and message != "":
                         generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
                         self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
