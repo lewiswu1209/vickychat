@@ -23,15 +23,16 @@ def generate(prompt, parameters, api_token):
 
     return None
 
-def sample(prompt, max_new_tokens, seed, top_p, api_token):
+def sample(prompt, max_new_tokens, seed, temperature, top_p, api_token):
     parameters = {
         "max_new_tokens": max_new_tokens,
-        "top_p": top_p,
         "do_sample": True,
         "seed": seed,
         "early_stopping": False,
         "length_penalty": 0.0,
-        "eos_token_id": None
+        "eos_token_id": None,
+        "temperature": temperature,
+        "top_p": top_p
     }
     return generate(prompt, parameters, api_token)
 

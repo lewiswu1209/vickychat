@@ -82,7 +82,7 @@ class Robot:
 
         generated_text_list:list[dict] = []
         seed:int = randint(1, 512)
-        output:str = bloom.sample(prompt, 64, seed, 0.65, api_token)
+        output:str = bloom.sample(prompt, 64, seed, 1, 0.65, api_token)
         if output:
             output:str = output[( len(prompt)-len("{" + self.state.profile["NAME"] + "：") ):]
             for line in output.split("}"):
@@ -100,7 +100,7 @@ class Robot:
                 else:
                     break
         else:
-            output:str = mt0_xxl_mt.sample(prompt, 64, seed, 0.65, api_token)
+            output:str = mt0_xxl_mt.sample(prompt, 64, seed, 1, 0.65, api_token)
             if output:
                 print(output)
                 if not output.startswith(input["speaker"] + "：") and not output.startswith(input["speaker"] + ":"):
