@@ -141,14 +141,19 @@ def send_msg():
                 "speaker" : user,
                 "message" : request.args.get("message")
             }
-            output = bot.chat(input_item)
-            history_list.append(input_item)
-            for item in output:
-                history_list.append(item)
-                item["type"]="incoming"
-            matrix[session_hash]["history"] = history_list
+        else:
+            input_item = {
+                "speaker" : user,
+                "message" : ""
+            }
+        output = bot.chat(input_item)
+        history_list.append(input_item)
+        for item in output:
+            history_list.append(item)
+            item["type"]="incoming"
+        matrix[session_hash]["history"] = history_list
 
-            return jsonify({
-                "status" : 0,
-                "output" : output
-            })
+        return jsonify({
+            "status" : 0,
+            "output" : output
+        })
