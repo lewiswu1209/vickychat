@@ -75,6 +75,10 @@ def setting_profile():
 
     return redirect( url_for("vicky.index") )
 
+@vicky_app.route("/writing")
+def write():
+    return render_template( "writing.html" )
+
 @vicky_app.route("/api_v1/get_session_hash")
 def get_session_hash():
     global matrix
@@ -123,6 +127,20 @@ def get_history():
             return jsonify(history)
     else:
         return jsonify([])
+
+@vicky_app.route("/api_v1/writing", methods=['POST'])
+def writing():
+    global matrix
+    session_hash = session.get("session_hash")
+    if not session_hash:
+        session_hash = request.args.get("hash")
+    memery = matrix.get(session_hash, {})
+    prompt = request.form.get("prompt")
+    txt = ""
+    with memery["lock"]:
+        bot = memery["bot"]
+        txt = bot.write(prompt)
+    return jsonify({"status": 0, "text": txt})
 
 @vicky_app.route("/api_v1/chat")
 def send_msg():

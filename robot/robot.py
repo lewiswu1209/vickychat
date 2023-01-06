@@ -111,3 +111,10 @@ class Robot:
         if len(generated_text_list) == 0:
             generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "……"})
         return generated_text_list
+
+    def write(self, prompt):
+        seed:int = randint(1, 512)
+        output:str = bloom.sample(prompt, 64, seed, 1, 0.65, api_token)
+        if output:
+            output = output[len(prompt):]
+        return output
