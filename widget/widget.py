@@ -1,5 +1,6 @@
 
 import requests
+import webbrowser
 
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -26,17 +27,32 @@ class Widget(QWidget):
         screen_height = screen.height()
         self.setGeometry(screen_width - self.width() - self.bubble.width(), screen_height - self.height(), self.width(), self.height())
 
-        action1 = QAction("退出", self)
-        action1.triggered.connect(qApp.quit)
-        action2 = QAction("显示/隐藏", self)
-        action2.triggered.connect(self.show_or_hide)
+        action_quit = QAction("退出", self)
+        action_quit.triggered.connect(qApp.quit)
+        action_show = QAction("显示/隐藏", self)
+        action_show.triggered.connect(self.show_or_hide)
+        action_anything = QAction("作画(Anything)", self)
+        action_anything.triggered.connect(self.open_anything_ai)
+        action_stable_diffusion_ai = QAction("作画(Stable Diffusion)", self)
+        action_stable_diffusion_ai.triggered.connect(self.open_stable_diffusion_ai)
+
+
         self.tray_menu = QMenu(self)
-        self.tray_menu.addAction(action2)
-        self.tray_menu.addAction(action1)
+        self.tray_menu.addAction(action_show)
+        self.tray_menu.addAction(action_anything)
+        self.tray_menu.addAction(action_stable_diffusion_ai)
+        self.tray_menu.addAction(action_quit)
+
         self.tray:QSystemTrayIcon = QSystemTrayIcon(self)
         self.tray.setIcon(QIcon('resources/image.png'))
         self.tray.setContextMenu(self.tray_menu)
         self.tray.show()
+
+    def open_anything_ai(self):
+        webbrowser.open("https://camenduru-webui.hf.space/")
+
+    def open_stable_diffusion_ai(self):
+        webbrowser.open("https://stabilityai-stable-diffusion.hf.space/")
 
     def show_or_hide(self):
         if self.isVisible():
