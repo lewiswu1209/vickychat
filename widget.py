@@ -5,11 +5,11 @@ from widget import Widget
 from widget import Bubble
 
 if __name__ == '__main__':
-    app = QApplication([])
+    app:QApplication = QApplication([])
 
-    bubble = Bubble()
+    bubble:Bubble = Bubble()
     bubble.hide()
-    widget = Widget(bubble)
+    widget:Widget = Widget(bubble)
     widget.show()
     
     app.exec_()

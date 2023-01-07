@@ -6,10 +6,10 @@ from config.config import chat_config
 
 if __name__ == "__main__":
     msg = sys.argv[1]
-    hash = chat_config["hash"]
+    hash:str = chat_config["hash"]
 
-    url = "{}/api_v1/set_session_hash?hash={}".format(chat_config["webhost"], hash)
-    rs = requests.get(url).json()
+    url:str = "{}/api_v1/set_session_hash?hash={}".format(chat_config["webhost"], hash)
+    rs:dict = requests.get(url).json()
     if rs["status"]==2:
         print("在设置中配置hash")
     if rs["status"]==1:
