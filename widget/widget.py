@@ -34,8 +34,8 @@ class Widget(QWidget):
         action_show.triggered.connect(self.show_or_hide)
         action_anything:QAction = QAction("作画(Anything)", self)
         action_anything.triggered.connect(self.browse_anything_ai)
-        action_stable_diffusion_ai:QAction = QAction("作画(Stable Diffusion)", self)
-        action_stable_diffusion_ai.triggered.connect(self.browse_stable_diffusion)
+        action_protogen_ai:QAction = QAction("作画(ProtoGem)", self)
+        action_protogen_ai.triggered.connect(self.browse_protogen_ai)
         action_writing:QAction = QAction("写作(Writing)", self)
         action_writing.triggered.connect(self.browse_writing)
         action_chatroom:QAction = QAction("聊天室", self)
@@ -46,7 +46,7 @@ class Widget(QWidget):
         self.tray_menu.addAction(action_chatroom)
         self.tray_menu.addAction(action_writing)
         self.tray_menu.addAction(action_anything)
-        self.tray_menu.addAction(action_stable_diffusion_ai)
+        self.tray_menu.addAction(action_protogen_ai)
         self.tray_menu.addAction(action_quit)
 
         self.tray:QSystemTrayIcon = QSystemTrayIcon(self)
@@ -58,8 +58,8 @@ class Widget(QWidget):
         webbrowser.open("https://camenduru-webui.hf.space/")
         self.bubble.hide()
 
-    def browse_stable_diffusion(self) -> None:
-        webbrowser.open("https://stabilityai-stable-diffusion.hf.space/")
+    def browse_protogen_ai(self) -> None:
+        webbrowser.open("https://darkstorm2150-stable-diffusion-protogen-x3-4-w-c63382f.hf.space/")
         self.bubble.hide()
 
     def browse_writing(self) -> None:
