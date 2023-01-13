@@ -13,6 +13,11 @@ class Widget(QWidget):
     def __init__(self, bubble:Bubble) -> None:
         super(Widget, self).__init__()
         self.bubble:Bubble = bubble
+        self.timer = QTimer(self)
+        self.waiting_input = False
+
+        self.timer.timeout.connect(self.bubble.hide)
+
         self.setWindowFlags(Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint|Qt.SubWindow)
         self.setAutoFillBackground(False)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
@@ -77,26 +82,37 @@ class Widget(QWidget):
         else:
             self.show()
 
-    def mouseDoubleClickEvent(self, event:QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton:
-            self.bubble.hide()
-            msg, ok = QInputDialog.getText(self, '', None, flags=Qt.FramelessWindowHint)
-            if ok:
-                hash:str = chat_config["hash"]
+    def show_bubble_with_text(self, text:str) -> None:
+        self.bubble.setText(text)
+        self.bubble.move(self.x() + int(self.width()*2/3), self.y() - int(self.height()/3))
+        self.bubble.show()
+        self.timer.start(5000)
 
+    def mouseDoubleClickEvent(self, event:QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton and not self.waiting_input:
+            self.waiting_input = True
+            self.bubble.hide()
+            input_dialog = QInputDialog(self)
+            input_dialog.setInputMode(QInputDialog.TextInput)
+            input_dialog.setLabelText("你想和我说什么~")
+            input_dialog.setWindowTitle(" ")
+            input_dialog.resize(500, 100)
+            input_dialog.show()
+            if input_dialog.exec_() == input_dialog.Accepted:
+                hash:str = chat_config["hash"]
+                msg:str = input_dialog.textValue()
                 url:str = "{}/api_v1/set_session_hash?hash={}".format(chat_config["webhost"], hash)
                 rs:dict = requests.get(url).json()
                 if rs["status"]==2:
-                    print("在设置中配置hash")
+                    self.show_bubble_with_text( "在设置中配置hash" )
                 if rs["status"]==1:
-                    print("在web中创建机器人")
+                    self.show_bubble_with_text( "在web中创建机器人" )
                 if rs["status"]==0:
                     url = "{}/api_v1/chat?message={}&hash={}".format(chat_config["webhost"], msg, hash)
                     rs = requests.get(url).json()
                     for item in rs["output"]:
-                        self.bubble.setText(item["message"])
-                        self.bubble.move(self.x() + int(self.width()*2/3), self.y() - int(self.height()/3))
-                        self.bubble.show()
+                        self.show_bubble_with_text( item["message"] )
+            self.waiting_input = False
 
     def contextMenuEvent(self, event:QMouseEvent) -> None:
         self.tray_menu.exec_( self.mapToGlobal( event.pos() ) )
