@@ -1,4 +1,5 @@
 
+import json
 import random
 import string
 import threading
@@ -13,71 +14,66 @@ from utils.time_utils import get_year_by_date_str, get_month_by_date_str, get_da
 
 vicky_app = Blueprint("vicky", __name__, url_prefix="/vicky")
 
-@vicky_app.route("")
-def deny_308():
-    return redirect( url_for("vicky.index") )
-
-@vicky_app.route("/", endpoint="index")
-def index():
-    session_hash = session.get( "session_hash" )
-    if not session_hash:
-        session_hash = request.args.get("hash")
-        session["session_hash"] = session_hash
-    if session_hash and session_hash in matrix.keys():
-        avatar_url = matrix.get(session_hash).get("bot").state.profile["AVATAR"]
-        pic = matrix.get(session_hash).get("bot").state.profile["PIC"]
-        user_pic = matrix.get(session_hash).get("user_pic")
-        return render_template( "vicky.html", avatar_url=avatar_url, pic=pic, user_pic=user_pic )
-    else:
-        return redirect( url_for("vicky.profile") )
-
-@vicky_app.route("/profile", endpoint="profile")
+@vicky_app.route("/user/setting", methods=["GET", "POST"])
 def profile():
-    return render_template( "profile.html" )
+    if request.method == "GET":
+        profile_url:str = url_for("vicky.profile")
+        session["next"] = request.args.get("next")
+        return render_template( "profile.html", profile_url=profile_url )
+    if request.method == "POST":
+        session["user"] = request.form["user"]
+        session["user_pic"] = request.form["user_pic"]
+        return redirect( session["next"] )
 
-@vicky_app.route("/setting", methods = ["POST"])
-def setting_profile():
-    session_hash = session.get("session_hash")
-    if session_hash is None:
-        session_hash = "".join( random.sample(string.ascii_lowercase + string.digits, 11) )
-        session["session_hash"] = session_hash
+@vicky_app.route("/<id>")
+@vicky_app.route("/<id>/")
+@vicky_app.route("/<id>/chatroom")
+def chatroom(id):
+    if "user" not in session:
+        return redirect(url_for("vicky.profile", next=request.full_path))
+    if id not in matrix.keys():
+        return redirect(url_for("vicky.setting", id=id))
+    avatar_url = matrix.get(id).get("bot").state.profile["AVATAR"]
+    pic = matrix.get(id).get("bot").state.profile["PIC"]
+    user_pic = session["user_pic"]
+    chat_api_url = url_for("vicky.api_v1.chat", id=id, speaker=session["user"])
+    return render_template( "vicky.html", avatar_url=avatar_url, pic=pic, user_pic=user_pic, chat_api_url=chat_api_url )
 
-    user = request.form.get("user")
-    name = request.form.get("name")
-    gender = request.form.get("gender")
-    birthday = request.form.get("birthday")
-    describe = request.form.get("describe")
-    avatar = request.form.get("avatar")
-    pic = request.form.get("pic")
-    user_pic = request.form.get("user_pic")
+@vicky_app.route("/<id>/setting", methods=["GET", "POST"])
+def setting(id):
+    if request.method == "GET":
+        return render_template( "setting.html", setting_url=url_for("vicky.setting", id=id) )
+    if request.method == "POST":
+        pic      = request.form.get("pic")
+        name     = request.form.get("name")
+        avatar   = request.form.get("avatar")
+        gender   = request.form.get("gender")
+        birthday = request.form.get("birthday")
+        describe = request.form.get("describe")
+        print( request.form.get("examples") )
+        examples = json.loads(request.form.get("examples"))
+        print( examples)
 
-    profile = {
-        "NAME": name,
-        "GENDER": gender,
-        "YEAROFBIRTH": str( get_year_by_date_str(birthday) ),
-        "MONTHOFBIRTH": str( get_month_by_date_str(birthday) ),
-        "DAYOFBIRTH": str( get_day_by_date_str(birthday) ),
-        "DESCRIBE": [describe],
-        "PIC": pic,
-        "AVATAR": avatar
-    }
-    memory = {}
-    memory["history"] = []
-    memory["lock"] = threading.Lock()
-    memory["user"] = user
-    memory["user_pic"] = user_pic
-    memory["bot"] = Robot(profile)
+        profile = {
+            "NAME": name,
+            "GENDER": gender,
+            "YEAROFBIRTH": str( get_year_by_date_str(birthday) ),
+            "MONTHOFBIRTH": str( get_month_by_date_str(birthday) ),
+            "DAYOFBIRTH": str( get_day_by_date_str(birthday) ),
+            "DESCRIBE": [describe],
+            "PIC": pic,
+            "AVATAR": avatar,
+            "EXAMPLES": examples
+        }
+        unit = {}
+        unit["lock"] = threading.Lock()
+        unit["bot"] = Robot(profile)
 
-    matrix[session_hash] = memory
+        matrix[id] = unit
 
-    return redirect( url_for("vicky.index") )
+        return redirect(url_for("vicky.chatroom", id=id))
 
-@vicky_app.route("/writing")
-def write():
-    session_hash = session.get( "session_hash" )
-    if not session_hash:
-        session_hash = request.args.get("hash")
-    if session_hash and session_hash in matrix.keys():
-        return render_template( "writing.html" )
-    else:
-        return redirect( url_for("vicky.profile") )
+@vicky_app.route("/<id>/write")
+def write(id):
+    write_api_url:str = url_for("vicky.api_v1.write", id=id)
+    return render_template( "writing.html", write_api_url=write_api_url )

@@ -3,26 +3,31 @@ import datetime
 
 from robot.state.action import Action
 from robot.state.work_type import WorkType
-from robot.state.disposition import Disposition
 
 from utils.day_type import DayType
 from utils.time_utils import get_datetype_by_date
 
 class State:
     def __init__(self) -> None:
+        self.example_list:list[dict] = []
         self.profile:dict = {}
         self.describe_list:list[str] = []
-        self.disposition:Disposition = Disposition.NORMAL
         self.work_type:WorkType = WorkType.NORMAL
 
     def update_profile(self, profile:dict) -> None:
         self.profile = profile
 
-    def update_disposition(self, disposition:Disposition) -> None:
-        self.disposition = disposition
-
     def update_work_type(self, work_type:WorkType) -> None:
         self.work_type = work_type
+
+    def add_example(self, example) -> None:
+        self.example_list.append(example)
+
+    def clear_example(self) -> None:
+        self.example_list = []
+
+    def update_example_list(self, example_list:list[dict]) -> None:
+        self.example_list = example_list
 
     def add_describe(self, describe) -> None:
         self.describe_list.append(describe)

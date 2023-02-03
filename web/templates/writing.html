@@ -93,22 +93,24 @@ $(document).ready(function() {
     $("#generate_btn").click(function() {
         $.ajax({
             type: "POST",
-            url: "api_v1/writing",
+            url: "{{ write_api_url }}",
             dataType: 'json',
             data: {prompt: $("#content_box").val()},
             timeout: 600000,
             success: function(data) {
-                str = data.text;
-                var i = 0;
-                var interval = setInterval(function() {
-                    tmp = $("#content_box").val();
-                    tmp += str[i];
-                    $("#content_box").val(tmp);
-                    i++;
-                    if (i >= str.length) {
-                        clearInterval(interval);
-                    }
-                }, 100);
+                if (data.code==0){
+                    str = data.data.generated_text
+                    var i = 0;
+                    var interval = setInterval(function() {
+                        tmp = $("#content_box").val();
+                        tmp += str[i];
+                        $("#content_box").val(tmp);
+                        i++;
+                        if (i >= str.length) {
+                            clearInterval(interval);
+                        }
+                    }, 50);
+                }
             }
         });
     });

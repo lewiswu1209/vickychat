@@ -1,6 +1,9 @@
 
-chat_config = {
-    "webhost": "http://127.0.0.1/vicky",
-    "hash": "hash"
-}
 api_token = ""
+
+client_config = {
+    "web_host": "http://127.0.0.1:18376/vicky",
+    "default_bot": "",
+    "name": "",
+    "image": "rabbit.png"
+}

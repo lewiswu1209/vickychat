@@ -25,6 +25,7 @@ class Robot:
 
         self.state.update_profile(settings)
         self.state.update_describe_list(settings["DESCRIBE"])
+        self.state.update_example_list(settings["EXAMPLES"])
 
     def __get_profile_str(self) -> str:
         profile = self.state.profile
@@ -47,6 +48,14 @@ class Robot:
 
         return profile_str + "\n"
 
+    def __get_prompt_by_examples(self) -> str:
+        example_list:list[dict] = self.state.example_list
+        prompt:str = ""
+        for example in example_list:
+            prompt += "{%s：%s}\n" % (example["speaker"], example["message"])
+
+        return prompt
+
     def __get_prompt_by_last_memery(self, n:int) -> str:
         memery_list:list[dict] = self.memery.get_last_memery_list(MemeryType.CHAT, n)
         prompt:str = ""
@@ -63,6 +72,7 @@ class Robot:
 
     def __get_prompt(self) -> str:
         prompt:str = self.__get_profile_str()
+        prompt += self.__get_prompt_by_examples()
         prompt += self.__get_prompt_by_last_memery(10)
 
         return prompt
@@ -99,15 +109,6 @@ class Robot:
                         self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
                 else:
                     break
-        else:
-            output:str = mt0_xxl_mt.sample(prompt, 64, seed, 1, 0.65, api_token)
-            if output:
-                print(output)
-                if not output.startswith(input["speaker"] + "：") and not output.startswith(input["speaker"] + ":"):
-                    if output.startswith(self.state.profile["NAME"] + "：") or output.startswith(self.state.profile["NAME"] + ":"):
-                        output:str = output[( len(self.state.profile["NAME"] + "：") ):]
-                    generated_text_list.append({"speaker": self.state.profile["NAME"], "message": output})
-                    self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": output})
         if len(generated_text_list) == 0:
             generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "……"})
         return generated_text_list

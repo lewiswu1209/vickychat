@@ -2,20 +2,18 @@
 import sys
 import requests
 
-from config.config import chat_config
+from config.config import client_config
 
 if __name__ == "__main__":
-    msg = sys.argv[1]
-    hash:str = chat_config["hash"]
+    web_host:str = client_config["web_host"]
+    message:str = sys.argv[1]
+    bot_id:str = client_config["default_bot"]
+    speaker:str = client_config["name"]
 
-    url:str = "{}/api_v1/set_session_hash?hash={}".format(chat_config["webhost"], hash)
+    url:str = "{}/api_v1/{}/chat?speaker={}&message={}".format(web_host, bot_id, speaker, message)
     rs:dict = requests.get(url).json()
-    if rs["status"]==2:
-        print("在设置中配置hash")
-    if rs["status"]==1:
-        print("在web中创建机器人")
-    if rs["status"]==0:
-        url = "{}/api_v1/chat?message={}&hash={}".format(chat_config["webhost"], msg, hash)
-        rs = requests.get(url).json()
-        for item in rs["output"]:
+    if rs["code"]==0:
+        for item in rs["data"]["response"]:
             print("{}:{}".format(item["speaker"], item["message"]))
+    else:
+        print(rs["msg"])

@@ -111,7 +111,7 @@
         }
     </style>
 </head>
-<body onload="loadhistory()">
+<body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-2 d-none d-md-block">
@@ -176,11 +176,11 @@
             output_box.value= "对方正在输入……";
             document.title = "聊天机器人 ~ 对方正在输入……"
             $.ajax({ 
-                url: "/vicky/api_v1/chat?message="+text, 
+                url: "{{chat_api_url}}&message="+text, 
                 dataType: 'json',
                 success: function(data){
                     flag = false
-                    data["output"].forEach(function(item) {
+                    data["data"]["response"].forEach(function(item) {
                         if (flag) {
                             now = new Date();
                             until_time = now.getTime() + 4000;
