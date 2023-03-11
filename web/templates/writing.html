@@ -100,16 +100,18 @@ $(document).ready(function() {
             success: function(data) {
                 if (data.code==0){
                     str = data.data.generated_text
-                    var i = 0;
-                    var interval = setInterval(function() {
-                        tmp = $("#content_box").val();
-                        tmp += str[i];
-                        $("#content_box").val(tmp);
-                        i++;
-                        if (i >= str.length) {
-                            clearInterval(interval);
-                        }
-                    }, 50);
+                    if (str.length > 0){
+                        var i = 0;
+                        var interval = setInterval(function() {
+                            tmp = $("#content_box").val();
+                            tmp += str[i];
+                            $("#content_box").val(tmp);
+                            i++;
+                            if (i >= str.length) {
+                                clearInterval(interval);
+                            }
+                        }, 50);
+                    }
                 }
             }
         });

@@ -2,7 +2,7 @@
 import json
 import requests
 
-API_URL = "https://api-inference.huggingface.co/models/bigscience/mt0-xxl-mt"
+API_URL = "https://api-inference.huggingface.co/models/bigscience/bloomz"
 
 def generate(prompt, parameters, api_token):
     headers = {"Authorization": f"Bearer " + api_token}
@@ -10,7 +10,6 @@ def generate(prompt, parameters, api_token):
         "inputs": prompt,
         "parameters": parameters,
         "options": {
-            "use_cache": True,
             "wait_for_model": True
         }
     }
@@ -20,6 +19,8 @@ def generate(prompt, parameters, api_token):
         json_response = json.loads(response.content.decode("utf-8"))
         if "error" not in json_response:
             return json_response[0]["generated_text"]
+    else:
+        return response.status_code
 
     return None
 

@@ -1,16 +1,9 @@
 
-import json
-import threading
-
+from flask import request
 from flask import jsonify
 from flask import Blueprint
-from flask import session, request
 
-from robot import Robot
 from web.vicky.global_var import matrix
-from utils.time_utils import get_day_by_date_str
-from utils.time_utils import get_year_by_date_str
-from utils.time_utils import get_month_by_date_str
 
 api_v1 = Blueprint("api_v1", __name__, url_prefix="/api_v1")
 

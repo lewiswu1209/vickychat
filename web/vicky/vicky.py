@@ -1,7 +1,5 @@
 
 import json
-import random
-import string
 import threading
 
 from flask import Blueprint
@@ -50,9 +48,7 @@ def setting(id):
         gender   = request.form.get("gender")
         birthday = request.form.get("birthday")
         describe = request.form.get("describe")
-        print( request.form.get("examples") )
         examples = json.loads(request.form.get("examples"))
-        print( examples)
 
         profile = {
             "NAME": name,

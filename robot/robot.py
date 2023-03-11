@@ -2,8 +2,7 @@
 from random import randint
 from datetime import datetime
 
-import robot.core.bloom as bloom
-import robot.core.mt0_xxl_mt as mt0_xxl_mt
+import robot.core.bloomz as bloomz
 
 from config import api_token
 
@@ -92,17 +91,20 @@ class Robot:
 
         generated_text_list:list[dict] = []
         seed:int = randint(1, 512)
-        output:str = bloom.sample(prompt, 64, seed, 1, 0.65, api_token)
-        if output:
+        output:str = bloomz.sample(prompt, 64, seed, 1, 0.65, api_token)
+        if type(output) == int:
+            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "BLOOM API HTTP ERROR {}".format(output)})
+        elif type(output) == str:
             output:str = output[( len(prompt)-len("{" + self.state.profile["NAME"] + "：") ):]
             for line in output.split("}"):
                 generated:str = line
-                if generated.startswith(self.state.profile["NAME"] + "："):
-                    message:str = generated[len(self.state.profile["NAME"] + "："):]
-                    if message and message != "":
-                        generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
-                        self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
-                elif generated.startswith("{" + self.state.profile["NAME"] + "："):
+                # if generated.startswith(self.state.profile["NAME"] + "："):
+                #     message:str = generated[len(self.state.profile["NAME"] + "："):]
+                #     if message and message != "":
+                #         generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
+                #         self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
+                # el
+                if generated.startswith("{" + self.state.profile["NAME"] + "："):
                     message:str = generated[len("{" + self.state.profile["NAME"] + "："):]
                     if message and message != "":
                         generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
@@ -115,7 +117,12 @@ class Robot:
 
     def write(self, prompt):
         seed:int = randint(1, 512)
-        output:str = bloom.sample(prompt, 64, seed, 1, 0.65, api_token)
-        if output:
-            output = output[len(prompt):]
-        return output
+        output:str = bloomz.sample(prompt, 256, seed, 1, 0.65, api_token)
+        rs = ""
+        if type(output) == int:
+            rs = "BLOOM API HTTP ERROR {}".format(output)
+        if type(output) == str:
+            rs = output[len(prompt):]
+        else:
+            rs = "ERROR"
+        return rs
