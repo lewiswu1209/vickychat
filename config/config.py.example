@@ -7,3 +7,14 @@ client_config = {
     "name": "",
     "image": "rabbit.png"
 }
+
+actions = [
+    {
+        "label": "翻译为中文",
+        "prompt": "{}\n将以上内容翻译成中文："
+    },
+    {
+        "label": "翻译为英语",
+        "prompt": "{}\nTranslate the above into English:"
+    },
+]
