@@ -34,6 +34,7 @@ class WorkerThread(QThread):
                         self.update.emit( all_generated_text )
                         time.sleep(0.05)
                 else:
+                    self.finished.emit()
                     break
             else:
                 self.update.emit( rs["msg"] )

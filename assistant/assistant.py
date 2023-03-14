@@ -59,6 +59,7 @@ class DesktopAssistant(QWidget):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._text_window.hide)
         self._is_thinking = False
+        self._dropped_text= None
 
         command_menu_items = []
 
@@ -136,14 +137,21 @@ class DesktopAssistant(QWidget):
     def dropEvent(self, event: QDropEvent) -> None:
         if event.mimeData().hasText():
             self._dropped_text = event.mimeData().text()
-            if not self._is_thinking:
-                self._command_menu.exec_( self.mapToGlobal( event.pos() ) )
-            else:
-                self._text_window.set_plain_text("还有工作正在进行中……")
+            self._command_menu.exec_( self.mapToGlobal( event.pos() ) )
+            self._dropped_text = None
+        event.accept()
+
+    def contextMenuEvent(self, event):
+        self._command_menu.exec_( self.mapToGlobal( event.pos() ) )
         event.accept()
 
     def _action(self, prompt_format:str):
         if not self._is_thinking:
+            if not self._dropped_text:
+                clipboard = qApp.clipboard()
+                if clipboard.mimeData().hasText():
+                    self._dropped_text = clipboard.text()
+
             self._is_thinking = True
             self._text_window.show()
             self._text_window.set_width(600)
@@ -154,6 +162,8 @@ class DesktopAssistant(QWidget):
             self._worker_thread.update.connect(self.on_update_text)
             self._worker_thread.finished.connect(self.finished)
             self._worker_thread.start()
+        else:
+            self._text_window.set_plain_text("还有工作正在进行中……")
 
     def on_update_text(self, rev_msg:str):
         self._text_window.set_plain_text(rev_msg)
