@@ -57,7 +57,7 @@ class DesktopAssistant(QWidget):
 
         self._text_window = TextWindow()
         self._timer = QTimer(self)
-        self._timer.timeout.connect(self._text_window.hide)
+        self._timer.timeout.connect(self._on_timer_stop)
         self._is_thinking = False
         self._dropped_text= None
 
@@ -177,6 +177,10 @@ class DesktopAssistant(QWidget):
         self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
         self._text_window.set_plain_text(rev_msg)
         self._timer.start(5000)
+
+    def _on_timer_stop(self):
+        self._text_window.hide()
+        self._timer.stop()
 
     def _browse_anything_ai(self) -> None:
         webbrowser.open("https://camenduru-webui-docker.hf.space/")
