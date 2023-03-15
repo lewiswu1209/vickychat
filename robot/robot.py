@@ -117,7 +117,7 @@ class Robot:
 
     def write(self, prompt):
         seed:int = randint(1, 512)
-        output:str = bloomz.sample(prompt, 256, seed, 1, 0.65, api_token)
+        output:str = bloomz.sample(prompt, 256, seed, 0.45, 0.45, api_token)
         rs = ""
         if type(output) == int:
             rs = "BLOOM API HTTP ERROR {}".format(output)
