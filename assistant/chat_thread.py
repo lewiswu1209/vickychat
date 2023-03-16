@@ -1,4 +1,5 @@
 
+import time
 import requests
 
 from PyQt5.QtCore import QThread
@@ -23,4 +24,8 @@ class ChatThread(QThread):
 
         if rs["code"]==0:
             for item in rs["data"]["response"]:
-                self.finished.emit( item["message"] )
+                message = ""
+                for char in item["message"]:
+                    message += char
+                    self.finished.emit( message )
+                    time.sleep(0.05)

@@ -28,9 +28,9 @@ class WorkerThread(QThread):
             if rs["code"]==0:
                 generated_text = rs["data"]["generated_text"]
                 if generated_text != "":
-                    for chat in generated_text:
-                        all_generated_text += chat
-                        self.prompt += chat
+                    for char in generated_text:
+                        all_generated_text += char
+                        self.prompt += char
                         self.update.emit( all_generated_text )
                         time.sleep(0.05)
                 else:

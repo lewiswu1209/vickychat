@@ -138,7 +138,6 @@ class DesktopAssistant(QWidget):
         if event.mimeData().hasText():
             self._dropped_text = event.mimeData().text()
             self._command_menu.exec_( self.mapToGlobal( event.pos() ) )
-            self._dropped_text = None
         event.accept()
 
     def contextMenuEvent(self, event):
@@ -154,6 +153,7 @@ class DesktopAssistant(QWidget):
 
             self._is_thinking = True
             self._text_window.show()
+            self._text_window.set_process_style()
             self._text_window.set_width(600)
             self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
             self._text_window.set_plain_text("思考中……")
@@ -169,14 +169,17 @@ class DesktopAssistant(QWidget):
         self._text_window.set_plain_text(rev_msg)
 
     def finished(self):
+        self._text_window.set_success_style()
+        self._dropped_text = None
         self._is_thinking = False
 
     def on_chat(self, rev_msg):
-        self._text_window.show()
-        self._text_window.set_width(300)
-        self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
+        if not self._text_window.isVisible():
+            self._text_window.show()
+            self._text_window.set_width(300)
+            self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
+            self._timer.start(5000)
         self._text_window.set_plain_text(rev_msg)
-        self._timer.start(5000)
 
     def _on_timer_stop(self):
         self._text_window.hide()

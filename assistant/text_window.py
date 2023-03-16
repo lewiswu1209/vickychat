@@ -82,3 +82,9 @@ class TextWindow(QWidget):
             self.move(self.old_pos.x(), self.old_pos.y() - new_height + self.text_edit_height)
             self.old_pos = self.pos()
             self.text_edit_height = new_height
+
+    def set_success_style(self):
+        self.setStyleSheet("border: 3px solid #B2DFB2; border-radius: 2px;")
+
+    def set_process_style(self):
+        self.setStyleSheet("border: 3px solid #add8e6; border-radius: 2px;")
