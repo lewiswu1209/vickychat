@@ -2,7 +2,7 @@
 from random import randint
 from datetime import datetime
 
-import robot.core.bloomz as bloomz
+import robot.core.bloom as bloom
 
 from config import api_token
 
@@ -91,19 +91,13 @@ class Robot:
 
         generated_text_list:list[dict] = []
         seed:int = randint(1, 512)
-        output:str = bloomz.sample(prompt, 64, seed, 1, 0.65, api_token)
-        if type(output) == int:
-            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "BLOOM API HTTP ERROR {}".format(output)})
-        elif type(output) == str:
+        ret_code, output = bloom.sample(prompt, 64, seed, 1, 0.65, api_token)
+        if ret_code != 0:
+            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": output})
+        else:
             output:str = output[( len(prompt)-len("{" + self.state.profile["NAME"] + "：") ):]
             for line in output.split("}"):
                 generated:str = line
-                # if generated.startswith(self.state.profile["NAME"] + "："):
-                #     message:str = generated[len(self.state.profile["NAME"] + "："):]
-                #     if message and message != "":
-                #         generated_text_list.append({"speaker": self.state.profile["NAME"], "message": message})
-                #         self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
-                # el
                 if generated.startswith("{" + self.state.profile["NAME"] + "："):
                     message:str = generated[len("{" + self.state.profile["NAME"] + "："):]
                     if message and message != "":
@@ -111,18 +105,14 @@ class Robot:
                         self.memery.add_memery(MemeryType.CHAT, {"speaker": self.state.profile["NAME"], "message": message})
                 else:
                     break
-        if len(generated_text_list) == 0:
-            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "……"})
         return generated_text_list
 
     def write(self, prompt):
         seed:int = randint(1, 512)
-        output:str = bloomz.sample(prompt, 256, seed, 0.45, 0.45, api_token)
+        ret_code, output = bloom.sample(prompt, 256, 42, 1, 0.65, api_token)
         rs = ""
-        if type(output) == int:
-            rs = "BLOOM API HTTP ERROR {}".format(output)
-        if type(output) == str:
-            rs = output[len(prompt):]
+        if ret_code != 0:
+            rs = output
         else:
-            rs = "ERROR"
+            rs = output[len(prompt):]
         return rs

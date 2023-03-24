@@ -8,13 +8,13 @@ client_config = {
     "image": "rabbit.png"
 }
 
-actions = [
+INSTRUCTIONS = [
     {
         "label": "翻译为中文",
-        "prompt": "{}\n将以上内容翻译成中文："
+        "prompt": "Instruction : Given an input sentence translate it into Chinese sentence. \ninput : {}\Chinese : "
     },
     {
         "label": "翻译为英语",
-        "prompt": "{}\nTranslate the above into English:"
+        "prompt": "Instruction : Given an input sentence translate it into English sentence. \ninput : {}\nEnglish : "
     },
 ]

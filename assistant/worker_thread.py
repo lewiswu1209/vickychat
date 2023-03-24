@@ -23,10 +23,11 @@ class WorkerThread(QThread):
         all_generated_text = ""
 
         while(True):
-            rs:dict = requests.post(url, data={"prompt":self.prompt}).json()
+            prompt: str = "----------\n{}".format(self.prompt)
+            rs:dict = requests.post(url, data={"prompt":prompt}).json()
 
             if rs["code"]==0:
-                generated_text = rs["data"]["generated_text"]
+                generated_text = rs["data"]["generated_text"].split("----------")[0]
                 if generated_text != "":
                     for char in generated_text:
                         all_generated_text += char

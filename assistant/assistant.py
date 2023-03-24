@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import QDesktopWidget
 from PyQt5.QtWidgets import QSystemTrayIcon
 
 from config.config import client_config
-from config.config import actions
+from config.config import INSTRUCTIONS
 
 from assistant.worker_thread import WorkerThread
 from assistant.chat_thread import ChatThread
@@ -63,12 +63,12 @@ class DesktopAssistant(QWidget):
 
         command_menu_items = []
 
-        for action in actions:
-            tmp = {
-                "text": action["label"],
-                "connect": partial(self._action, action["prompt"])
+        for instruceion in INSTRUCTIONS:
+            menu_item = {
+                "text": instruceion["label"],
+                "connect": partial(self._action, instruceion["prompt"])
             }
-            command_menu_items.append(tmp)
+            command_menu_items.append(menu_item)
 
         self._command_menu:QMenu = QMenu(self)
         for item in command_menu_items:
