@@ -39,9 +39,13 @@ class DesktopAssistant(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint|Qt.WindowStaysOnTopHint|Qt.Tool)
         self.setAcceptDrops(True)
 
+        screen:QRect = QDesktopWidget().availableGeometry()
+        screen_width:int = screen.width()
+        screen_height:int = screen.height()
+
         pixmap:QPixmap = QPixmap( "resources/image/rabbit.png" )
-        pixmap_height:int = 300
-        pixmap_width:int  = int((pixmap.width()/pixmap.height())*300)
+        pixmap_height:int = int(screen_height * 0.25)
+        pixmap_width:int  = int((pixmap.width()/pixmap.height())*pixmap_height)
         pixmap = pixmap.scaled(pixmap_width, pixmap_height, Qt.KeepAspectRatio )
 
         label:QLabel = QLabel(self)
@@ -49,10 +53,6 @@ class DesktopAssistant(QWidget):
         label.show()
 
         self.resize(label.width(), label.height())
-
-        screen:QRect = QDesktopWidget().availableGeometry()
-        screen_width:int = screen.width()
-        screen_height:int = screen.height()
         self.setGeometry(screen_width - self.width(), screen_height - self.height(), self.width(), self.height())
 
         self._text_window = TextWindow()
@@ -166,6 +166,11 @@ class DesktopAssistant(QWidget):
             self._text_window.set_plain_text("还有工作正在进行中……")
 
     def on_update_text(self, rev_msg:str):
+        if not self._text_window.isVisible():
+            self._text_window.show()
+            self._text_window.set_process_style()
+            self._text_window.set_width(600)
+            self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
         self._text_window.set_plain_text(rev_msg)
 
     def finished(self):
