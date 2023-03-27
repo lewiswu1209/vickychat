@@ -27,16 +27,21 @@ class WorkerThread(QThread):
             rs:dict = requests.post(url, data={"prompt":prompt}).json()
 
             if rs["code"]==0:
-                generated_text = rs["data"]["generated_text"].split("----------")[0]
+                splited_rs:list = rs["data"]["generated_text"].split("----------")
+                generated_text = splited_rs[0]
                 if generated_text != "":
                     for char in generated_text:
                         all_generated_text += char
                         self.prompt += char
                         self.update.emit( all_generated_text )
-                        time.sleep(0.05)
+                        time.sleep(0.02)
+                    if len( splited_rs ) > 1:
+                        self.finished.emit()
+                        break
                 else:
                     self.finished.emit()
                     break
             else:
                 self.update.emit( rs["msg"] )
+                self.finished.emit()
                 break
