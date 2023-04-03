@@ -1,5 +1,6 @@
 
 from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QTextCursor
 from PyQt5.QtGui import QFontMetrics
 
 from PyQt5.QtCore import Qt
@@ -31,9 +32,13 @@ class TextWindow(QWidget):
 
     def set_plain_text(self, text:str) -> None:
         self.text_edit.setPlainText(text)
+        self.text_edit.moveCursor(QTextCursor.End)
+        self.text_edit.ensureCursorVisible()
 
     def set_html(self, text:str) -> None:
         self.text_edit.setHtml(text)
+        self.text_edit.moveCursor(QTextCursor.End)
+        self.text_edit.ensureCursorVisible()
 
     def set_width(self, width:int):
         old_width = self.geometry().width()

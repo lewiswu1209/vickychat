@@ -93,7 +93,7 @@ class Robot:
         seed:int = randint(1, 512)
         ret_code, output = bloom.sample(prompt, 64, seed, 1, 0.65, api_token)
         if ret_code != 0:
-            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": output})
+            generated_text_list.append({"speaker": self.state.profile["NAME"], "message": "HTTP {} - {}".format(ret_code, output)})
         else:
             output:str = output[( len(prompt)-len("{" + self.state.profile["NAME"] + "：") ):]
             for line in output.split("}"):
@@ -109,10 +109,10 @@ class Robot:
 
     def write(self, prompt):
         seed:int = randint(1, 512)
-        ret_code, output = bloom.sample(prompt, 256, 42, 1, 0.65, api_token)
+        ret_code, output = bloom.sample(prompt, 256, seed, 1, 0.65, api_token)
         rs = ""
         if ret_code != 0:
-            rs = output
+            rs = "HTTP {} - {}".format(ret_code, output)
         else:
             rs = output[len(prompt):]
         return rs

@@ -1,4 +1,5 @@
 
+import ctypes
 import webbrowser
 
 from functools import partial
@@ -43,8 +44,13 @@ class DesktopAssistant(QWidget):
         screen_width:int = screen.width()
         screen_height:int = screen.height()
 
+        gdi32 = ctypes.WinDLL('gdi32', winmode=0x0001)
+        hDC = gdi32.CreateDCW("DISPLAY", None, None, None)
+        dpiY = gdi32.GetDeviceCaps(hDC, 90)
+        gdi32.DeleteDC(hDC)
+
         pixmap:QPixmap = QPixmap( "resources/image/rabbit.png" )
-        pixmap_height:int = int(screen_height * 0.25)
+        pixmap_height:int = int(dpiY * 1.5) #int(screen_height * 0.15)
         pixmap_width:int  = int((pixmap.width()/pixmap.height())*pixmap_height)
         pixmap = pixmap.scaled(pixmap_width, pixmap_height, Qt.KeepAspectRatio )
 
@@ -154,7 +160,7 @@ class DesktopAssistant(QWidget):
             self._is_thinking = True
             self._text_window.show()
             self._text_window.set_process_style()
-            self._text_window.set_width(600)
+            self._text_window.set_width(4*self.width())
             self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
             self._text_window.set_plain_text("思考中……")
             self._worker_thread = WorkerThread()
@@ -169,7 +175,7 @@ class DesktopAssistant(QWidget):
         if not self._text_window.isVisible():
             self._text_window.show()
             self._text_window.set_process_style()
-            self._text_window.set_width(600)
+            self._text_window.set_width(self.width()*4)
             self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
         self._text_window.set_plain_text(rev_msg)
 
@@ -181,7 +187,7 @@ class DesktopAssistant(QWidget):
     def on_chat(self, rev_msg):
         if not self._text_window.isVisible():
             self._text_window.show()
-            self._text_window.set_width(300)
+            self._text_window.set_width(int(self.width() * 2))
             self._text_window.move(self.x() - (self._text_window.width() - self.width()), self.y() - self._text_window.height())
             self._timer.start(5000)
         self._text_window.set_plain_text(rev_msg)

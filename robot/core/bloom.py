@@ -26,7 +26,7 @@ def generate(prompt: str, parameters: dict, api_token: str) -> tuple:
             status_code = 0
             response_data = json_response[0]["generated_text"]
         else:
-            response_data = response.text
+            response_data = json_response["error"]
     else:
         response_data = response.text
 
