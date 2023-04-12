@@ -1,5 +1,7 @@
 
 api_token = ""
+host = "127.0.0.1"
+port = 18376
 
 client_config = {
     "web_host": "http://127.0.0.1:18376/vicky",
@@ -15,7 +17,7 @@ INSTRUCTIONS = [
 Input : A trial is set in the courtroom and the judge has to decide Ponyboy’s fate. Is he guilty or not guilty?
 Chinese : 审判在法庭上进行，法官将决定波尼博伊的命运。他到底是有罪还是无罪？
 ----------
-Instruction : Instruction : Given an input sentence, translate it into a Chinese sentence.
+Instruction : Given an input sentence, translate it into a Chinese sentence.
 Input : {}
 Chinese : '''
     },
@@ -24,6 +26,10 @@ Chinese : '''
         "prompt": '''Instruction : Given an input sentence, translate it into an English sentence.
 Input : 和平是各国人民共同的愿望，也是世界发展的潮流。中国人民珍爱和平，坚定维护和平的决心和意志，中国愿同世界各国一道，为实现持久和平共同努力。
 English : Peace is the common wish of all the people of the world, and it is also the tide of world development. The Chinese people cherish peace, firmly uphold the determination and will to maintain peace, and China is willing to work with all countries in the world to make efforts to achieve lasting peace.
+----------
+Instruction : Given an input sentence, translate it into an English sentence.
+Input : 长城是中华民族的象征，是中国悠久历史的见证。长城是人类文明的结晶，是中华民族的骄傲。
+English : The Great Wall is the symbol of the Chinese nation, and it is the witness of the long history of China. The Great Wall is the crystallization of human civilization, and it is the pride of the Chinese nation.
 ----------
 Instruction : Given an input sentence, translate it into an English sentence.
 Input : {}

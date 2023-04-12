@@ -8,7 +8,8 @@ from PyQt5.QtCore import pyqtSignal
 from config.config import client_config
 
 class ChatThread(QThread):
-    finished = pyqtSignal(str)
+    update = pyqtSignal(str, int, bool)
+    finished = pyqtSignal()
 
     def __init__(self, parent=None):
         super(ChatThread, self).__init__(parent)
@@ -27,5 +28,6 @@ class ChatThread(QThread):
                 message = ""
                 for char in item["message"]:
                     message += char
-                    self.finished.emit( message )
+                    self.update.emit( message, 2, False )
                     time.sleep(0.05)
+            self.finished.emit()

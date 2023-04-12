@@ -28,8 +28,11 @@ def generate(prompt: str, parameters: dict, api_token: str) -> tuple:
         else:
             response_data = json_response["error"]
     else:
-        response_data = response.text
-
+        try:
+            json_response: dict = json.loads(response.content.decode("utf-8"))
+            response_data = json_response["error"]
+        except ValueError:
+            response_data = response.text
     return status_code, response_data
 
 def sample(prompt: str, max_new_tokens: int, seed: int, temperature: float, top_p: float, api_token: str) -> str:
